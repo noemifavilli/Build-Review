@@ -799,5 +799,24 @@ function Test-WDAC {
 }
 
 
+# Run the checks
+$isAdmin = ([Security.Principal.WindowsPrincipal] `
+    [Security.Principal.WindowsIdentity]::GetCurrent()
+).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
 
+Test-PasswordPolicy
+Test-FileShares
+Test-Antivirus
+Test-ThirdPartyApp
+Test-WindowsSecurityUpdates
+Test-Accounts
+Test-Firewall
+Test-UnquotedPaths
+Test-WeakServices
+Test-WeakPasswords
+Test-USBPolicy
+Test-BitLocker
+Test-WDAC
 
+$script:AuditResults | Format-Table -AutoSize
+$script:AuditResults | Export-Csv (Join-Path $PSScriptRoot 'BuildReviewResults.csv') -NoTypeInformation
