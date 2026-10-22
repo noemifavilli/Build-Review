@@ -1,3 +1,11 @@
+
+#  Build Review Script for cyber passport
+
+#  v0.1 demonstrated on 20/10/2026
+# 
+
+############## for v0.1 ##############
+
     # script perfroms secruity checks for a build review, including:
     # password policies - done
     # file shares - done
@@ -13,9 +21,9 @@
 
 ############## for v1.0 ##############
     
-    # local admin on syst
-    # max admin (4) and domain admin 
-    # disabled ipv6 , ipv4 enabled/preferred 
+    # disabled ipv6 , ipv4 enabled/preferred done 
+    # local admin on syst done 
+    # max admin (4) and domain admin, together with above check done
     # laps 
     # multicast network resolution protools enabled? 3
     # nla net lev auth - required 
@@ -356,14 +364,14 @@ function Test-ThirdPartyApp {
         }
 
         # Export all apps
-        $data | Export-Csv data.csv -NoTypeInformation
+        $data | Export-Csv ThirdPartyData.csv -NoTypeInformation
 
         # Export results
         Add-Result `
             -Category "Third Party Applications" `
             -Check "Application Inventory" `
             -Expected "Inventory exported for review" `
-            -Actual "$($data.Count) applications exported to data.csv" `
+            -Actual "$($data.Count) applications exported to ThirdPartyData.csv" `
             -Status "Pass"
     } catch {
          Add-Result `
@@ -798,6 +806,121 @@ function Test-WDAC {
     }
 }
 
+############### IPv6 disabled and IPv4 enabled ###############
+function Test-IPprotocol {
+    try {
+
+        # Check IP configuration 
+        $disabledProtocols = Get-ItemPropertyValue `
+            -Path "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters" `
+            -Name DisabledProtocols `
+            -ErrorAction SilentlyContinue
+        
+        # Check if IPv4 is enabled
+        # Show what protocols are bound to network adapters
+        # ms_tcpip = ipv4 
+        # if any adapters are using IPv4 then it is set to true 
+        $IPv4enabled = ( Get-NetAdapterBinding ` -ComponentID ms_tcpip).Enabled -contains $true
+        # Check if IPv4/6 are disabled/preferred
+        # 0xFF is 255 in decimal - this disables IPv6 in the system
+        $IPv6disabled = ($disabledProtocols -eq 0xFF)
+        # 0x20 is 32 in decimals - also means to prefer the IPv4 over IPV6
+        $IPv4preferred = ($disabledProtocols -eq 0x20)
+        
+        # Check whether IPv4 is enabled and/or Ipv6 disabled/IPv4 preferred 
+        Add-Result `
+            -Category "Security Hardening" `
+            -Check "IP Protocol Configuration" `
+            -Expected "IPv4 enabled, IPv6 disabled or IPv4 preferred" `
+            -Actual "IPv4 Enabled: $ipv4Enabled, DisabledComponents: $disabledComponents" `
+            -Status $(if ($ipv4Enabled -and ($ipv6Disabled -or $ipv4Preferred)) { "Pass" } else { "Fail" })
+
+    } catch {
+        Add-Result `
+            -Category "Security Hardening" `
+            -Check "IP Protocol Configuration" `
+            -Expected "Protocol settings retrievable" `
+            -Actual $_.Exception.Message `
+            -Status "Error"
+    }
+}
+
+############### Local admin on system ###############
+# and check there is max 4 admins on system
+function Test-LocalAdmin {
+    try {
+        # Get all of approved memebers
+        $ApprovedMembers = Get-LocalGroupMember -Group "Administrators" -ErrorAction Stop
+
+        # Loop through them alland add them to the csv 
+        foreach ($member in $ApprovedMembers) {
+            Add-Result `
+                -Category "Privileged Access"
+                -Check "Local Admin Membership"
+                -Expected "Only authorised members"
+                -Actual $member.Name
+                -Status "Manual Review"
+        }
+        
+        # Check how many admins there are 
+        Add-Result `
+            -Category "Privileged Access"
+            -Check "Local Admin count"
+            -Expected "Not more than 4 admins"            
+            -Actual "$($member.Count) Administrators"
+            -Status $(if ($member.Count -le 4) { Pass } else { Fail })
+
+    } catch {
+        Add-Result `
+            -Category "Privileged Access" `
+            -Check "Local Administrator Enumeration" `
+            -Expected "Administrators group retrieved successfully" `
+            -Actual $_.Exception.Message `
+            -Status "Error"
+    }
+}
+
+############### LAPS (Local Admin Pasword Solutions) ###############
+# 1 = enabled and 0 = disabled and missing = not configured
+function Test-LAPS {
+    try {
+        # Use built in command 
+        # Command that saves the data in a zip file under a Temp and prints the file location
+        # to choose a folder Get-LapsDiagnostics -OutputFolder 'C:\LapsDiagnostics'
+        $LapsFolder = 'C:\BuildReview\Build-Review\LapsDiagnostic'
+        $ExtractFolder = Join-Path $LapsFolder 'Extracted'
+
+        # Create the directory 
+        New-Item -ItemType Directory -Path $LapsFolder -Force -ErrorAction Stop | Out-Null
+        # Get Diagnostics
+        Get-LapsDiagnostics -OutputFolder $LapsFolder -ErrorAction Stop 
+
+        # Zip file path
+        # Laps file is alwasy called LapsDiagnostics_somethingsomething.zip
+        $zip = Get-ChildItem $LapsFolder -Filter 'LapsDiagnostics_*.zip'
+
+        # Extract the content
+        Expand-Archive -LiteralPath $zip.FullName -DestinationPath $ExtractFolder -Force
+
+        Write-Host "Data collected in folder: $ExtractFolder"
+
+    } catch {
+        Write-Host "Couldn' gather LAPS data"
+    }
+}
+
+
+
+
+
+
+
+###############  ###############
+###############  ###############
+###############  ###############
+
+
+
 
 # Run the checks
 $isAdmin = ([Security.Principal.WindowsPrincipal] `
@@ -817,6 +940,9 @@ Test-WeakPasswords
 Test-USBPolicy
 Test-BitLocker
 Test-WDAC
+Test-IPprotocol
+Test-LocalAdmin
+Test-LAPS
 
 $script:AuditResults | Format-Table -AutoSize
 $script:AuditResults | Export-Csv (Join-Path $PSScriptRoot 'BuildReviewResults.csv') -NoTypeInformation
