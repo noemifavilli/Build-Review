@@ -1045,7 +1045,7 @@ function Test-LSA {
             -Category "Security Hardening" `
             -Check "Local Security Authority" `
             -Expected "Enabled (1)" `
-            -Actual "RunAsPPL = $lsa"
+            -Actual "RunAsPPL = $lsa" `
             -Status $(if ($lsa -eq 0) { "Pass" }  else { "Fail" })
     } catch {
          Add-Result `
