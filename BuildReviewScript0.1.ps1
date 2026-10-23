@@ -508,7 +508,7 @@ function Test-Firewall {
                 -Check "$($fire.Name) Profile" `
                 -Expected "Enabled and Default Inbound Action = Block" `
                 -Actual "Enabled: $($fire.Enabled), Inbound: $($fire.DefaultInboundAction)" `
-                -Status $(if ($fire.Enabled -and $fire.DefaultInboundAction -eq 'Block') 
+                -Status $(if ($fire.Enabled -and $fire.DefaultInboundAction -ne 'Allow') 
                 { 'Pass' } else { 'Fail' })
         }
     } catch {
@@ -780,19 +780,27 @@ function Test-BitLocker {
 # Policies folder C:\Windows\System32\CodeIntegrity\CIPolicies\Active
 function Test-WDAC {
     try {
-        $wdacPolicy =Get-ChildItem ` "C:\Windows\System32\CodeIntegrity\CiPolicies\Active\" `
-            -Filter *.cip `
-            -ErrorAction SilentlyContinue
+        $wdacPolicy = @(Get-ChildItem `
+            -Path "C:\Windows\System32\CodeIntegrity\CiPolicies\Active\" `
+            -Filter "*.cip" `
+            -ErrorAction SilentlyContinue)
 
         # Double check there is the WDAC policy
-        if ($wdacPolicy) {
+        if ($wdacPolicy -gt 0) {
 
             Add-Result `
                 -Category "Security Policies" `
                 -Check "WDAC Configuration" `
                 -Expected "WDAC policy present" `
-                -Actual "$($wdacPolicies.Count) policy file(s) found" `
-                -Status "Pass"
+                -Actual "$($wdacPolicy.Count) policy file(s) found" `
+                -Status  if $($)"Pass"
+        } else {
+            Add-Result `
+                -Category "Security Policies" `
+                -Check "WDAC Configuration" `
+                -Expected "WDAC policy present" `
+                -Actual "No active policies found" `
+                -Status "Fail"
         }
     }
     catch {
@@ -887,7 +895,7 @@ function Test-Laps {
         $laps = Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Policies\LAPS' -ErrorAction Stop
 
         # Properties to pass checks 
-        $pass = ( $laps.BackupDirectory -ge 1 -and
+        $pass = ($laps.BackupDirectory -ge 1 -and
                 $laps.PasswordLength -gt 12 -and
                 $laps.PasswordAgeDays -le 30
         )
