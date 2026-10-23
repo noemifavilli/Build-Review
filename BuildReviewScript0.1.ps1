@@ -881,7 +881,7 @@ function Test-LocalAdmin {
 }
 
 ############### LAPS (Local Admin Pasword Solutions) ###############
-function Test_Laps {
+function Test-Laps {
     try {
         # Gather Laps data
         $laps = Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Policies\LAPS' -ErrorAction Stop
