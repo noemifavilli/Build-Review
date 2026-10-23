@@ -26,9 +26,9 @@
     # max admin (4) and domain admin, together with above check done
     # laps done
     # multicast network resolution protools enabled? 3 done 
-    # nla net lev auth - required 
-    # rdp enabled 
-    # lsa prtoection ! enabled 
+    # nla net lev auth - required done 
+    # rdp enabled done
+    # lsa prtoection ! enabled done 
     # user acc cont (uac) enabled 
     # safe dll search mode 
     # always install elevated disabled
@@ -960,10 +960,108 @@ function Test-NameResolution {
     }
 }
 
+############### Network Level Authentication (NLA) ###############
+# It is required, and when enabled it has value of 1 
+# in: HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp
+function Test-NLA {
+    try {
+        # Path to settings 
+        $path = "HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp"
+
+        # Variable
+        $nla = Get-ItemPropertyValue `
+            -Path $path `
+            -Name userAuthentication `
+            -ErrorAction Stop
+        
+        Add-Result `
+            -Category "Remote Access" `
+            -Check "Netowrk Level Authentication" `
+            -Expected "Enabled (1)" `
+            -Actual "userAuthentication = $nla" `
+            -Status $(if ($nla -eq 1) { "Pass" } else { "Fail" })       
+    } catch {
+        Add-Result `
+            -Category "Remote Access" `
+            -Check "Network Level Authentication" `
+            -Expected "Configuration retrievable" `
+            -Actual $_.Exception.Message `
+            -Status "Error"
+    }
+}
+
+############### Remot Desktop Protocol ###############
+# Needs to be enabled = 0 
+# I disabled = 1 
+# -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name fDenyTSConnections
+function Test-RDP {
+    try {
+        # Path to configurations 
+        $path = "HKLM:\System\CurrentControlSet\Control\Terminal Server"
+
+        # Variable 
+        $rdp = Get-ItemPropertyValue `
+            -Path $path `
+            -Name fDenyTSConnections `
+            -ErrorAction Stop
+        
+        Add-Result `
+            -Category "Remote Access" `
+            -Check "Remote Desktop Protocol" `
+            -Expected "Enabled (0)" `
+            -Actual "fDenyTSConnections = $rdp" `
+            -Status $(if ($nla -eq 0) { "Pass" } else { "Fail"} )
+    } catch {
+        Add-Result `
+            -Category "Remote Access" `
+            -Check "Remote Desktop Protocol" `
+            -Expected "Configuration retrievable" `
+            -Actual $_.Exception.Message `
+            -Status "Error"
+    }
+}
+
+############### Local Security Authority (LSA) ###############
+# should be enabled = 1 
+# disabled = 0
+function Test-LSA {
+    try {
+        $path = "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Lsa"
+        $lsa = Get-ItemPropertyValue `
+            -Path $path `
+            -Name RunAsPPL `
+            -ErrorAction Stop
+        
+        if ($null -eq $lsa) {
+            Add-Result `
+                -Category "Security Hardening" `
+                -Check "Local Security Authority" `
+                -Expected "Enabled (1)" `
+                -Actual "LSA not existent on system" `
+                -Status "Error"
+        }    
+
+        Add-Result `
+            -Category "Security Hardening" `
+            -Check "Local Security Authority" `
+            -Expected "Enabled (1)" `
+            -Actual "RunAsPPL = $lsa"
+            -Status $(if ($lsa -eq 0) { "Pass" }  else { "Fail" })
+    } catch {
+         Add-Result `
+            -Category "Security Hardening" `
+            -Check "Local Security Authority" `
+            -Expected "Enabled (1)" `
+            -Actual $_.Exception.Message `
+            -Status "Error"
+    }
+}
 
 
 
 
+
+###############  ###############
 ###############  ###############
 ###############  ###############
 
@@ -992,6 +1090,10 @@ Test-IPprotocol
 Test-LocalAdmin
 Test-LAPS
 Test-NameResolution
+Test-NLA
+Test-RDP
+Test-LSA
+
 
 $script:AuditResults | Format-Table -AutoSize -Wrap 
 $script:AuditResults | Export-Csv (Join-Path $PSScriptRoot 'BuildReviewResults.csv') -NoTypeInformation
