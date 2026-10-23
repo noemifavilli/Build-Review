@@ -25,7 +25,7 @@
     # local admin on syst done 
     # max admin (4) and domain admin, together with above check done
     # laps done
-    # multicast network resolution protools enabled? 3
+    # multicast network resolution protools enabled? 3 done 
     # nla net lev auth - required 
     # rdp enabled 
     # lsa prtoection ! enabled 
