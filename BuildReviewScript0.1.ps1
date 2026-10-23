@@ -1026,7 +1026,7 @@ function Test-RDP {
 # disabled = 0
 function Test-LSA {
     try {
-        $path = "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Lsa"
+        $path = "HKLM:\System\CurrentControlSet\Control\Lsa"
         $lsa = Get-ItemPropertyValue `
             -Path $path `
             -Name RunAsPPL `
