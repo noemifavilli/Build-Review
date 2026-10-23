@@ -29,7 +29,7 @@
     # nla net lev auth - required done 
     # rdp enabled done
     # lsa prtoection ! enabled done 
-    # user acc cont (uac) enabled 
+    # user acc cont (uac) enabled done 
     # safe dll search mode 
     # always install elevated disabled
     # smbv1
@@ -900,6 +900,7 @@ function Test-Laps {
                 $laps.PasswordAgeDays -le 30
         )
 
+        # Print results and check if the configurations pass the checks 
         Add-Result `
             -Category "Privileged Access" `
             -Check "LAPS implementation" `
@@ -909,6 +910,7 @@ function Test-Laps {
             -Status $(if ($pass) { "Pass" } else { "Fail" })
 
     } catch {
+        # Error handlig 
         Write-Host "Error laps"
         Add-Result `
             -Category "Privileged Access" `
@@ -940,10 +942,12 @@ function Test-NameResolution {
         continue 
 
         # If path exists
+        # Retrieve data 
         $config = Get-ItemPropertyValue `
             -Path $path `
             -ErrorAction SilentlyContinue
-        
+
+            # Add result 
             Add-Result `
                 -Category "Security Hardening" `
                 -Check "Multicast Name Resolution" `
@@ -968,12 +972,13 @@ function Test-NLA {
         # Path to settings 
         $path = "HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp"
 
-        # Variable
+        # Variable gathering 
         $nla = Get-ItemPropertyValue `
             -Path $path `
             -Name userAuthentication `
             -ErrorAction Stop
         
+        # Add result 
         Add-Result `
             -Category "Remote Access" `
             -Check "Netowrk Level Authentication" `
@@ -999,12 +1004,13 @@ function Test-RDP {
         # Path to configurations 
         $path = "HKLM:\System\CurrentControlSet\Control\Terminal Server"
 
-        # Variable 
+        # Variable gathering 
         $rdp = Get-ItemPropertyValue `
             -Path $path `
             -Name fDenyTSConnections `
             -ErrorAction Stop
         
+        # Add to standardised output format     
         Add-Result `
             -Category "Remote Access" `
             -Check "Remote Desktop Protocol" `
@@ -1026,12 +1032,14 @@ function Test-RDP {
 # disabled = 0
 function Test-LSA {
     try {
+        # Get path and variable value from settings 
         $path = "HKLM:\System\CurrentControlSet\Control\Lsa"
         $lsa = Get-ItemPropertyValue `
             -Path $path `
             -Name RunAsPPL `
             -ErrorAction Stop
         
+        # If it is equal to null / doesn't exist then throw an error
         if ($null -eq $lsa) {
             Add-Result `
                 -Category "Security Hardening" `
@@ -1041,6 +1049,7 @@ function Test-LSA {
                 -Status "Error"
         }    
 
+        # Otherwise display configuration 
         Add-Result `
             -Category "Security Hardening" `
             -Check "Local Security Authority" `
@@ -1057,6 +1066,120 @@ function Test-LSA {
     }
 }
 
+############### User Account Control (UAC) ###############
+# Function that asks for permission before any chamges are done to the device
+# Enabled = 1
+# Disabled = 0 
+function Test-UAC {
+    try {
+        # Get path and varibale from settings 
+        $path = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System"
+        $uac = Get-ItemPropertyValue `
+            -Path $path `
+            -Name EnableLUA `
+            -ErrorAction Stop
+        
+        # Display results 
+         Add-Result `
+            -Category "Security Hardening" `
+            -Check "User Account Control" `
+            -Expected "Enabled (1)" `
+            -Actual "EnableLUA = $uac" `
+            -Status $(if ($uac -eq 1) { "Pass" }  else { "Fail" })
+    } catch {
+        Add-Result `
+            -Category "Security Hardening" `
+            -Check "User Account Control" `
+            -Expected "Enabled (1)" `
+            -Actual $_.Exception.Message `
+            -Status "Error"
+    }
+}
+
+############### Safe DLL Search ###############
+# Enabled =1 and Disabled = 0 
+function Test-SafeDLLSearch {
+    try {
+        # Gather path and variable
+        $path = "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager"
+        $dll = Get-ItemPropertyValue `
+            -Path $path `
+            -Name SafeDllSearchMode `
+            -ErrorAction Stop
+    
+        # check if it exists     
+        if ($null -eq $dll) {
+            Add-Result `
+            -Category "Security Hardening" `
+            -Check "User Account Control" `
+            -Expected "Enabled (1)" `
+            -Actual "Not Configured" `
+            -Status "Error"
+        } 
+
+        # Display results 
+        Add-Result `
+            -Category "Security Hardening" `
+            -Check "Safe DLL Search" `
+            -Expected "Enabled (1)" `
+            -Actual "SafeDllSearchMode = $dll" `
+            -Status $(if ($dll -eq 1) { "Pass" } else { "Fail" })
+
+    } catch {
+        Add-Result `
+            -Category "Security Hardening" `
+            -Check "User Account Control" `
+            -Expected "Enabled (1)" `
+            -Actual $_.Exception.Message `
+            -Status "Error"
+    }
+}
+
+
+############### Always Install Elevated ###############
+# Function that if enabled a standard user can execute installs with SYSTEM privileged
+# This leads to privilege escalation aas code can be executed as NT AUTHORITY/SYSTEM - higher level of privilege on system 
+# Should be disabled = 0
+function Test-AlwaysInstallElevated {
+    try {
+        # Path in system
+        $path = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Installer"
+
+        # Variable requried 
+        $alwaysInstall = Get-ItemPropertyValue `
+            -Path $path `
+            -Name AlwaysInstallElevated `
+            -ErrorAction Stop
+        
+        # If the variable is missing 
+        if ($null -eq $alwaysInstall) {
+            Add-Result `
+                -Category "Security Hardening" `
+                -Check "Always Install Elevated" `
+                -Expected "Disabled (0)" `
+                -Actual "Always Install Elevated was not configured" `
+                -Status "Error"
+        } 
+        continue 
+
+        # If the variable is not missing 
+        Add-Result `
+            -Category "Security Hardening" `
+            -Check "Always Install Elevated" `
+            -Expected "Disabled (0)" `
+            -Actual "AlwaysInstallElevated = $alwaysInstall" `
+            -Status $(if ($alwaysInstall -eq 0) { "Pass" } else { "Fail" })
+        
+    } catch {
+        Add-Result `
+            -Category "Security Hardening" `
+            -Check "Always Install Elevated" `
+            -Expected "Disabled (0)" `
+            -Actual $_.Exception.Message `
+            -Status "Error"
+    }
+}
+
 
 
 
@@ -1064,9 +1187,16 @@ function Test-LSA {
 ###############  ###############
 ###############  ###############
 ###############  ###############
+###############  ###############
+###############  ###############
 
 
-
+    # always install elevated disabled
+    # smbv1
+    # win verified trust enabled
+    # open ports PS whats open / whjat shoukd be open / wht shouldn't 
+    # microsfot store disabled
+    # web filtering -  explit db website check
 
 # Run the checks
 $isAdmin = ([Security.Principal.WindowsPrincipal] `
@@ -1093,6 +1223,9 @@ Test-NameResolution
 Test-NLA
 Test-RDP
 Test-LSA
+Test-UAC
+Test-SafeDLLSearch
+Test-AlwaysInstallElevated
 
 
 $script:AuditResults | Format-Table -AutoSize -Wrap 
