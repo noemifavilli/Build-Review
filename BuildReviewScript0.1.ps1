@@ -855,19 +855,19 @@ function Test-LocalAdmin {
         # Loop through them alland add them to the csv 
         foreach ($member in $ApprovedMembers) {
             Add-Result `
-                -Category "Privileged Access"
-                -Check "Local Admin Membership"
-                -Expected "Only authorised members"
-                -Actual $member.Name
+                -Category "Privileged Access" `
+                -Check "Local Admin Membership" `
+                -Expected "Only authorised members" `
+                -Actual $member.Name `
                 -Status "Manual Review"
         }
         
         # Check how many admins there are 
         Add-Result `
-            -Category "Privileged Access"
-            -Check "Local Admin count"
-            -Expected "Not more than 4 admins"            
-            -Actual "$($member.Count) Administrators"
+            -Category "Privileged Access" `
+            -Check "Local Admin count" `
+            -Expected "Not more than 4 admins" `
+            -Actual "$($member.Count) Administrators" `
             -Status $(if ($member.Count -le 4) { Pass } else { Fail })
 
     } catch {
