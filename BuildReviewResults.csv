@@ -28,4 +28,4 @@
 "Security Hardening","IP Protocol Configuration","Protocol settings retrievable","Property DisabledProtocols does not exist at path HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters.","Error"
 "Privileged Access","Local Admin Membership","Only authorised members","labwin11-1\Administrator","Manual Review"
 "Privileged Access","Local Admin Membership","Only authorised members","labwin11-1\fspadmin","Manual Review"
-"Privileged Access","Local Administrator Enumeration","Administrators group retrieved successfully","The term 'Pass' is not recognized as the name of a cmdlet, function, script file, or operable program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.","Error"
+"Privileged Access","Local Admin count","Not more than 4 admins","2 Administrators","Pass"
