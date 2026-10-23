@@ -34,3 +34,6 @@
 "Remote Access","Netowrk Level Authentication","Enabled (1)","userAuthentication = 1","Pass"
 "Remote Access","Remote Desktop Protocol","Enabled (0)","fDenyTSConnections = 1","Fail"
 "Security Hardening","Local Security Authority","Enabled (1)","RunAsPPL = 2","Fail"
+"Security Hardening","User Account Control","Enabled (1)","EnableLUA = 1","Pass"
+"Security Hardening","User Account Control","Enabled (1)","Property SafeDllSearchMode does not exist at path HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager.","Error"
+"Security Hardening","Always Install Elevated","Disabled (0)","Cannot find path 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\Installer' because it does not exist.","Error"
