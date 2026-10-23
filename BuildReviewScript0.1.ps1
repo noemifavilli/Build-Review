@@ -901,6 +901,7 @@ function Test_Laps {
             -Status $(if ($pass) { "Pass" } else { "Fail" })
 
     } catch {
+        Write-Host "Error laps"
         Add-Result `
             -Category "Privileged Access" `
             -Check "Windows LAPS" `
