@@ -929,7 +929,7 @@ function Test-NameResolution {
         # Check if the path exist as it does not exist on my machine 
         if (-not (Test-Path $path)) {
             Add-Result `
-                -Category "Security Hardening"
+                -Category "Security Hardening" `
                 -Check "Multicast Name Resolution" `
                 -Expected "Disabled" `
                 -Actual "No DNSClient path exists" `
