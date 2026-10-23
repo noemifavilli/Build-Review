@@ -24,7 +24,7 @@
     # disabled ipv6 , ipv4 enabled/preferred done 
     # local admin on syst done 
     # max admin (4) and domain admin, together with above check done
-    # laps 
+    # laps done
     # multicast network resolution protools enabled? 3
     # nla net lev auth - required 
     # rdp enabled 
@@ -919,12 +919,51 @@ function Test-Laps {
     }
 }
 
+############### Multicast name resolution enabled ###############
+# 0 = Disabled and 1 = Enabled Missing = Not Configured 
+function Test-NameResolution {
+    try {
+        # Path where the settings and configuration for this check should be 
+        $path = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\DNSClient"
+
+        # Check if the path exist as it does not exist on my machine 
+        if (-not (Test-Path $path)) {
+            Add-Result `
+                -Category "Security Hardening"
+                -Check "Multicast Name Resolution" `
+                -Expected "Disabled" `
+                -Actual "No DNSClient path exists" `
+                -Status "Review"
+            return
+        }
+
+        continue 
+
+        # If path exists
+        $config = Get-ItemPropertyValue `
+            -Path $path `
+            -ErrorAction SilentlyContinue
+        
+            Add-Result `
+                -Category "Security Hardening" `
+                -Check "Multicast Name Resolution" `
+                -Expected "Disabled (0)" `
+                -Actual "$config" `
+                -Status $(if ($config -eq 0) { "Pass" } else { "Fail" })
+    } catch {
+           Add-Result `
+                -Category "Security Hardening" `
+                -Check "LLMNR" `
+                -Expected "Configuration retrievable" `
+                -Actual $_.Exception.Message `
+                -Status "Error" 
+    }
+}
 
 
 
 
 
-###############  ###############
 ###############  ###############
 ###############  ###############
 
