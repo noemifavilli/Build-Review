@@ -819,9 +819,9 @@ function Test-IPprotocol {
     try {
 
         # Check IP configuration 
-        $disabledProtocols = Get-ItemPropertyValue `
+        $disabledComponents = Get-ItemPropertyValue `
             -Path "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters" `
-            -Name DisabledProtocols `
+            -Name DisabledComponents `
             -ErrorAction SilentlyContinue
         
         # Check if IPv4 is enabled
@@ -831,9 +831,9 @@ function Test-IPprotocol {
         $IPv4enabled = ( Get-NetAdapterBinding ` -ComponentID ms_tcpip).Enabled -contains $true
         # Check if IPv4/6 are disabled/preferred
         # 0xFF is 255 in decimal - this disables IPv6 in the system
-        $IPv6disabled = ($disabledProtocols -eq 0xFF)
+        $IPv6disabled = ($disabledComponents -eq 0xFF)
         # 0x20 is 32 in decimals - also means to prefer the IPv4 over IPV6
-        $IPv4preferred = ($disabledProtocols -eq 0x20)
+        $IPv4preferred = ($disabledComponents -eq 0x20)
         
         # Check whether IPv4 is enabled and/or Ipv6 disabled/IPv4 preferred 
         Add-Result `
