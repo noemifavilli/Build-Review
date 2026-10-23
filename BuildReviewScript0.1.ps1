@@ -867,8 +867,8 @@ function Test-LocalAdmin {
             -Category "Privileged Access" `
             -Check "Local Admin count" `
             -Expected "Not more than 4 admins" `
-            -Actual "$($member.Count) Administrators" `
-            -Status $(if ($member.Count -le 4) { Pass } else { Fail })
+            -Actual "$($ApprovedMembers.Count) Administrators" `
+            -Status $(if ($ApprovedMembers.Count -le 4) { "Pass" } else { "Fail" })
 
     } catch {
         Add-Result `
@@ -881,34 +881,34 @@ function Test-LocalAdmin {
 }
 
 ############### LAPS (Local Admin Pasword Solutions) ###############
-# 1 = enabled and 0 = disabled and missing = not configured
-function Test-LAPS {
+function Test_Laps {
     try {
-        # Use built in command 
-        # Command that saves the data in a zip file under a Temp and prints the file location
-        # to choose a folder Get-LapsDiagnostics -OutputFolder 'C:\LapsDiagnostics'
-        $LapsFolder = 'C:\BuildReview\Build-Review\LapsDiagnostic'
-        $ExtractFolder = Join-Path $LapsFolder 'Extracted'
+        # Gather Laps data
+        $laps = Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Policies\LAPS' -ErrorAction Stop
 
-        # Create the directory 
-        New-Item -ItemType Directory -Path $LapsFolder -Force -ErrorAction Stop | Out-Null
-        # Get Diagnostics
-        Get-LapsDiagnostics -OutputFolder $LapsFolder -ErrorAction Stop 
+        # Properties to pass checks 
+        $pass = ( $laps.BackupDirectory -ge 1 -and
+                $laps.PasswordLength -gt 12 -and
+                $laps.PasswordAgeDays -le 30
+        )
 
-        # Zip file path
-        # Laps file is alwasy called LapsDiagnostics_somethingsomething.zip
-        $zip = Get-ChildItem $LapsFolder -Filter 'LapsDiagnostics_*.zip'
-
-        # Extract the content
-        Expand-Archive -LiteralPath $zip.FullName -DestinationPath $ExtractFolder -Force
-
-        Write-Host "Data collected in folder: $ExtractFolder"
+        Add-Result `
+            -Category "Privileged Access" `
+            -Check "LAPS implementation" `
+            -Expected "Configured and enabled" `
+            -Actual "Account = $($laps.AdminstratorAccountName), password length = $($laps.PasswordLength),
+                    password age = $($laps)"
+            -Status $(if ($pass) { "Pass" } else { "Fail" })
 
     } catch {
-        Write-Host "Couldn' gather LAPS data"
+        Add-Result `
+            -Category "Privileged Access" `
+            -Check "Windows LAPS" `
+            -Expected "Configured and enabled" `
+            -Actual "LAPS policy not configured" `
+            -Status "Fail"
     }
 }
-
 
 
 
@@ -944,5 +944,5 @@ Test-IPprotocol
 Test-LocalAdmin
 Test-LAPS
 
-$script:AuditResults | Format-Table -AutoSize
+$script:AuditResults | Format-Table -AutoSize -Wrap 
 $script:AuditResults | Export-Csv (Join-Path $PSScriptRoot 'BuildReviewResults.csv') -NoTypeInformation
