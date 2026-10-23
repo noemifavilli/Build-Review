@@ -33,4 +33,5 @@
 "Security Hardening","Multicast Name Resolution","Disabled","No DNSClient path exists","Review"
 "Remote Access","Netowrk Level Authentication","Enabled (1)","userAuthentication = 1","Pass"
 "Remote Access","Remote Desktop Protocol","Enabled (0)","fDenyTSConnections = 1","Fail"
-"Security Hardening","Local Security Authority","Enabled (1)","Cannot find path 'C:\Build-Review\HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Lsa' because it does not exist.","Error"
+"Security Hardening","Local Security Authority","Enabled (1)","RunAsPPL = 2",""
+"Security Hardening","Local Security Authority","Enabled (1)","The term '-Status' is not recognized as the name of a cmdlet, function, script file, or operable program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.","Error"
