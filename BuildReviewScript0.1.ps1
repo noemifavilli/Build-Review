@@ -991,6 +991,7 @@ Test-WDAC
 Test-IPprotocol
 Test-LocalAdmin
 Test-LAPS
+Test-NameResolution
 
 $script:AuditResults | Format-Table -AutoSize -Wrap 
 $script:AuditResults | Export-Csv (Join-Path $PSScriptRoot 'BuildReviewResults.csv') -NoTypeInformation
