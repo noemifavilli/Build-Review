@@ -29,5 +29,4 @@
 "Privileged Access","Local Admin Membership","Only authorised members","labwin11-1\fspadmin","Manual Review"
 "Privileged Access","Local Admin count","Not more than 4 admins","2 Administrators","Pass"
 "Privileged Access","Windows LAPS","Configured and enabled","LAPS policy not configured","Fail"
-"Security Hardening","","","",""
-"Security Hardening","LLMNR","Configuration retrievable","The term '-Check' is not recognized as the name of a cmdlet, function, script file, or operable program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.","Error"
+"Security Hardening","Multicast Name Resolution","Disabled","No DNSClient path exists","Review"
