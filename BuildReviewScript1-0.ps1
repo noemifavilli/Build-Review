@@ -1079,6 +1079,17 @@ function Test-UAC {
             -Name EnableLUA `
             -ErrorAction Stop
         
+        if (-not (Test-Path $path)) {
+            Add-Result `
+                -Category "Security Hardening" `
+                -Check "Always Install Elevated" `
+                -Expected "Disabled (0)" `
+                -Actual "Not Configured" `
+                -Status "Pass"
+
+            return 
+        }
+
         # Display results 
          Add-Result `
             -Category "Security Hardening" `
@@ -1102,13 +1113,15 @@ function Test-SafeDLLSearch {
     try {
         # Gather path and variable
         $path = "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager"
-        $dll = Get-ItemPropertyValue `
+        $dll = Get-ItemProperty `
             -Path $path `
             -Name SafeDllSearchMode `
             -ErrorAction Stop
-    
+        
+        $valid = $dll.SafeDllSearchMode    
+        
         # check if it exists     
-        if ($null -eq $dll) {
+        if ($null -eq $valid) {
             Add-Result `
             -Category "Security Hardening" `
             -Check "User Account Control" `
