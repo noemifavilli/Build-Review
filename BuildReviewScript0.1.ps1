@@ -1184,14 +1184,13 @@ function Test-AlwaysInstallElevated {
 
 
 
-###############  ###############
-###############  ###############
-###############  ###############
-###############  ###############
+############### SMBv1 ###############
+############### Windows Verified Trust ###############
+############### Microsfot Store Disabled ###############
+############### Web Filtering ###############
 ###############  ###############
 
 
-    # always install elevated disabled
     # smbv1
     # win verified trust enabled
     # open ports PS whats open / whjat shoukd be open / wht shouldn't 
