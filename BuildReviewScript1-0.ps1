@@ -31,7 +31,7 @@
     # lsa prtoection ! enabled done 
     # user acc cont (uac) enabled done 
     # safe dll search mode 
-    # always install elevated disabled
+    # always install elevated disabled done
     # smbv1
     # win verified trust enabled
     # open ports PS whats open / whjat shoukd be open / wht shouldn't 
@@ -1193,11 +1193,51 @@ function Test-AlwaysInstallElevated {
     }
 }
 
-
-
-
-
 ############### SMBv1 ###############
+# Should be disabled so to reduce the risk of exposure to ransomware/malware and MIM attacks 
+# Get-WindowsOptionalFeature -Online -FeatureName SMB1Protocol
+function SMBv1 {
+    try {
+
+        # Gather the data needed 
+        $smb = Get-WindowsOptionalFeature `
+            -Online `
+            -FeatureName SMB1Protocol `
+            -ErrorAction SilentlyContinue
+
+        # Check that the state variable is set to Disabled 
+        # If it is not equal to Disabled
+        if ($smb.State -ne "Disabled") {
+            Add-Result `
+                -Category "Security Hardening" `
+                -Check "SMBv1" `
+                -Expected "Disabled" `
+                -Actual "SMBv1 = $smb" `
+                -Status "Fail"
+        } 
+        if ($smb.State -eq "Disabled") {
+            # If it is set to Disabled
+             Add-Result `
+                -Category "Security Hardening" `
+                -Check "SMBv1" `
+                -Expected "Disabled" `
+                -Actual "SMBv1 = $smb" `
+                -Status "Pass"
+        }
+    } catch {
+         Add-Result `
+                -Category "Security Hardening" `
+                -Check "SMBv1" `
+                -Expected "Disabled" `
+                -Actual  $_.Exception.Message `
+                -Status "Fail"
+    }
+}
+
+
+
+
+
 ############### Windows Verified Trust ###############
 ############### Microsfot Store Disabled ###############
 ############### Web Filtering ###############
