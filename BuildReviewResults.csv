@@ -9,7 +9,7 @@
 "Antivirus","Windows Defender","Enabled and Up To Date","State: On, Signatures: UpToDate","Pass"
 "Third Party Applications","Application Inventory","Inventory exported for review","18 applications exported to ThirdPartyData.csv","Pass"
 "Windows Updates","Missing Security Updates","No missing updates","1 updates pending","Fail"
-"Windows Updates","Security Intelligence Update for Microsoft Defender Antivirus - KB2267602 (Version 1.461.209.0) - Current Channel (Broad)","Installed","Missing","Fail"
+"Windows Updates","Security Intelligence Update for Microsoft Defender Antivirus - KB2267602 (Version 1.461.211.0) - Current Channel (Broad)","Installed","Missing","Fail"
 "Accounts","Administrator","Disabled or Renamed","Name: Administrator, Enabled: False, Last Logon: ","Pass"
 "Accounts","DefaultAccount","Disabled","Name: DefaultAccount, Enabled: False, Last Logon: ","Pass"
 "Accounts","Guest","Disabled","Name: Guest, Enabled: False, Last Logon: ","Pass"
