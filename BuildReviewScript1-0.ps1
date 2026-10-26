@@ -1196,7 +1196,7 @@ function Test-AlwaysInstallElevated {
 ############### SMBv1 ###############
 # Should be disabled so to reduce the risk of exposure to ransomware/malware and MIM attacks 
 # Get-WindowsOptionalFeature -Online -FeatureName SMB1Protocol
-function SMBv1 {
+function Test-SMBv1 {
     try {
 
         # Gather the data needed 
@@ -1278,6 +1278,7 @@ Test-LSA
 Test-UAC
 Test-SafeDLLSearch
 Test-AlwaysInstallElevated
+Test-SMBv1 
 
 
 $script:AuditResults | Format-Table -AutoSize -Wrap 
