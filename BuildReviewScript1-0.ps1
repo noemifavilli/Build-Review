@@ -1082,7 +1082,7 @@ function Test-UAC {
         if (-not (Test-Path $path)) {
             Add-Result `
                 -Category "Security Hardening" `
-                -Check "Always Install Elevated" `
+                -Check "User Account Control" `
                 -Expected "Disabled (0)" `
                 -Actual "Not Configured" `
                 -Status "Pass"
@@ -1124,7 +1124,7 @@ function Test-SafeDLLSearch {
         if ($null -eq $valid) {
             Add-Result `
             -Category "Security Hardening" `
-            -Check "User Account Control" `
+            -Check "Safe DLL Search" `
             -Expected "Enabled (1)" `
             -Actual "Not Configured" `
             -Status "Error"
@@ -1141,7 +1141,7 @@ function Test-SafeDLLSearch {
     } catch {
         Add-Result `
             -Category "Security Hardening" `
-            -Check "User Account Control" `
+            -Check "Safe DLL Search" `
             -Expected "Enabled (1)" `
             -Actual $_.Exception.Message `
             -Status "Error"
