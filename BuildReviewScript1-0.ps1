@@ -1247,17 +1247,50 @@ function Test-SMBv1 {
     }
 }
 
-
-
-
-
 ############### Windows Verified Trust ###############
+# function Test-WinVerTrust {
+#     try {
+
+#      #  $wintrust = 
+#     } catch {
+
+#     }
+# }
+
 ############### Microsfot Store Disabled ###############
+function Test-MicrosoftStore {
+    # Path that found policy on my own machine 
+    $path =  "HKLM:\SOFTWARE\Policies\Microsoft\WindowsStore"
+
+    # Check path exists
+    if (Test-Path $path) {
+        # Get data
+        $store =Get-ItemProperty $path
+
+        # Check that the store option 
+        $pass = $store.RemoveWindowsStore -eq 1
+        
+        Add-Result `
+            -Category "Application Control" `
+            -Check "Microsoft Store DIsabled" `
+            -Expected "Disabled (1)" `
+            -Actual "RemoveWindowsStore = $($store.RemoveWindowsStore)" `
+            -Status $(if($pass) { "Pass" } else { "Fail"} )
+    }
+
+    Add-Result `
+        -Category "Application Control" `
+        -Check "Microsoft Store Disabled" `
+        -Expected "Disabled" `
+        -Actual "Policy not configured" `
+        -Status "Fail"
+
+}
+
+
 ############### Web Filtering ###############
 ###############  ###############
 
-
-    # smbv1
     # win verified trust enabled
     # open ports PS whats open / whjat shoukd be open / wht shouldn't 
     # microsfot store disabled
