@@ -1326,7 +1326,7 @@ function Test-NetworkProtection {
             -Category "Web Filtering" `
             -Check "Network Protection" `
             -Expected "Enabled (1)" `
-            -Actual $NetProtection `
+            -Actual "EnableNetworkProtection = $NetProtection" `
             -Status $(if ($NetProtection -eq 1) { "Pass" } if ($pua -eq 0) { "Disabled"} else { "Fail" })
     } catch {
         Add-Result `
@@ -1349,7 +1349,7 @@ function Test-PUA {
             -Category "Web Filtering" `
             -Check "Potentially Unwanted Applications" `
             -Expected "Blocked (1)" `
-            -Actual $pua `
+            -Actual "PUAProtection = $pua" `
             -Status $(if ($pua -eq 1) { "Pass" } if ($pua -eq 0) { "Disabled" } else { "Fail" })
 
     } catch {
@@ -1372,7 +1372,7 @@ function Test-FolderAccess {
                 -Category "Web Filtering" `
                 -Check "Controlled Folder Access" `
                 -Expected "Enabled (1)" `
-                -Actual $cfa `
+                -Actual "EnableControlledFolderAccess = $cfa" `
                 -Status $(if ($cfa -eq 1) { "Pass" } if ($pua -eq 0) { "Disabled" } else { "Fail" })
     } catch {
         Add-Result `
@@ -1394,7 +1394,7 @@ function Test-RealTimeProtection {
                 -Category "Web Filtering" `
                 -Check "Real Time Protection" `
                 -Expected "False (Enabled)" `
-                -Actual $RealTime `
+                -Actual "DisableRealtimeMonitoring = $RealTime" `
                 -Status $(if ($cfa -eq $false) { "Pass" } else { "Fail" })
     } catch {
         Add-Result `
@@ -1416,7 +1416,7 @@ function Test-ScriptScanning {
             -Category "Web Filtering" `
             -Check "Script Scanning" `
             -Expected "False (Enabled)" `
-            -Actual $scriptScan `
+            -Actual "DisableScriptScanning = $scriptScan" `
             -Status $(if ($scriptScan -eq $false) { "Pass" } else { "Fail" })
     } catch {
         Add-Result `
@@ -1438,7 +1438,7 @@ function Test-DownloadProtection {
             -Category "Web Filtering" `
             -Check "Download Protection" `
             -Expected "False (Enabled)" `
-            -Actual $downloadProtection `
+            -Actual "DisableIOAVProtection = $downloadProtection" `
             -Status $(if ($downloadProtection -eq $false) { "Pass" } else { "Fail" })
     } catch {
         Add-Result `
@@ -1460,7 +1460,7 @@ function Test-BehaviourMonitoring {
             -Category "Web Filtering" `
             -Check "Behaviour Monitoring" `
             -Expected "False (Enabled)" `
-            -Actual $behaviour `
+            -Actual "DisableBehaviorMonitoring = $behaviour" `
             -Status $(if ($behaviour -eq $false) { "Pass" } else { "Fail" })
     } catch {
         Add-Result `
@@ -1485,7 +1485,7 @@ function Test-ASR {
             -Category "Web Filtering" `
             -Check "ASR" `
             -Expected "ASR > 0" `
-            -Actual $asr `
+            -Actual "AttackSurfaceReductionRules_Actions = $asr" `
             -Status $(if ($asr.Count -gt 0) { "Pass" } else { "Review" })
     } catch {
         Add-Result `
