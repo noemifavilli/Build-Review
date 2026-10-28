@@ -900,26 +900,37 @@ function Test-Laps {
                 $laps.PasswordAgeDays -le 30
         )
 
-        # Print results and check if the configurations pass the checks 
-        Add-Result `
-            -Category "Privileged Access" `
-            -Check "LAPS implementation" `
-            -Expected "Configured and enabled" `
-            -Actual "Account = $($laps.AdminstratorAccountName), password length = $($laps.PasswordLength),
-                    password age = $($laps)"
-            -Status $(if ($pass) { "Pass" } else { "Fail" })
+        # If there is no path 
+        if ($null -eq $path) {
+            Write-Host "LAPS Path was not found"
+            Add-Result `
+                -Category "Privileged Access" `
+                -Check "LAPS implementation" `
+                -Expected "Configured and Enabled" `
+                -Actual "Device not AD/AzureAD joined - LAPS not applicable" `
+                -Status "Fail"
+        } else {
+            # Print results and check if the configurations pass the checks 
+            Add-Result `
+                -Category "Privileged Access" `
+                -Check "LAPS implementation" `
+                -Expected "Configured and enabled" `
+                -Actual "Account = $($laps.AdminstratorAccountName), password length = $($laps.PasswordLength),
+                        password age = $($laps.PasswordAgeDays)"
+                -Status $(if ($pass) { "Pass" } else { "Fail" })
+        } 
 
-    } catch {
-        # Error handlig 
-        Write-Host "Error laps"
-        Write-Host $_.Exception.Message
+        } catch {
+            # Error handlig 
+            Write-Host "Error laps"
+            Write-Host $_.Exception.Message
 
-        Add-Result `
-            -Category "Privileged Access" `
-            -Check "Windows LAPS" `
-            -Expected "Configured and enabled" `
-            -Actual "LAPS policy not configured" `
-            -Status "Fail"
+            Add-Result `
+                -Category "Privileged Access" `
+                -Check "Windows LAPS" `
+                -Expected "Configured and enabled" `
+                -Actual "LAPS policy not configured" `
+                -Status "Fail"
     }
 }
 
