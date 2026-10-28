@@ -1247,16 +1247,6 @@ function Test-SMBv1 {
     }
 }
 
-############### Windows Verified Trust ###############
-# function Test-WinVerTrust {
-#     try {
-
-#      #  $wintrust = 
-#     } catch {
-
-#     }
-# }
-
 ############### Microsfot Store Disabled ###############
 function Test-MicrosoftStore {
     # Path that found policy on my own machine 
@@ -1323,12 +1313,20 @@ function Test-OpenPorts {
     }
 }
 
+############### Windows Verified Trust ###############
+# function Test-WinVerTrust {
+#     try {
+
+#      #  $wintrust = 
+#     } catch {
+
+#     }
+# }
+
 ############### Web Filtering ###############
 ###############  ###############
 
     # win verified trust enabled
-    # open ports PS whats open / whjat shoukd be open / wht shouldn't 
-    # microsfot store disabled
     # web filtering -  explit db website check
 
 # Run the checks
