@@ -1547,6 +1547,12 @@ Test-MicrosoftStore
 Test-OpenPorts
 Test-NetworkProtection
 Test-PUA
+Test-FolderAccess
+Test-RealTimeProtection
+Test-ScriptScanning
+Test-DownloadProtection
+Test-BehaviourMonitoring
+Test-ASR
 
 $script:AuditResults | Format-Table -AutoSize -Wrap 
 $script:AuditResults | Export-Csv (Join-Path $PSScriptRoot 'BuildReviewResults.csv') -NoTypeInformation
