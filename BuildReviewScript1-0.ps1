@@ -1319,7 +1319,7 @@ function Test-OpenPorts {
 function Test-NetworkProtection {
     try {
         # Gather the commands answers and according to what the output is print result 
-        $NetProtection = Get-MpPreference | Select-Object EnableNetworkProtection
+        $NetProtection = (Get-MpPreference).EnableNetworkProtection
 
         # According to result print pass/fail 
         Add-Result `
@@ -1343,7 +1343,7 @@ function Test-NetworkProtection {
 function Test-PUA {
     try {
         # Gather data 
-        $pua = Get-MpPreference | Select-Object PUAProtection
+        $pua = (Get-MpPreference).PUAProtection
 
         Add-Result `
             -Category "Web Filtering" `
@@ -1366,7 +1366,7 @@ function Test-PUA {
 #  0 = disabled / 1 = enabled / 2 = audit 
 function Test-FolderAccess {
     try {
-        $cfa = Get-MpPreference | Select-Object EnableControlledFolderAccess
+        $cfa = (Get-MpPreference).EnableControlledFolderAccess
 
         Add-Result `
                 -Category "Web Filtering" `
@@ -1388,7 +1388,7 @@ function Test-FolderAccess {
 # if False = Real time protection enabled  
 function Test-RealTimeProtection {
     try {
-        $RealTime = Get-MpPreference | Select-Object DisableRealtimeMonitoring
+        $RealTime = (Get-MpPreference).DisableRealtimeMonitoring
 
          Add-Result `
                 -Category "Web Filtering" `
@@ -1410,7 +1410,7 @@ function Test-RealTimeProtection {
 # Expected = False 
 function Test-ScriptScanning {
     try {
-        $scriptScan = Get-MpPreference | Select-Object DisableScriptScanning
+        $scriptScan = (Get-MpPreference).DisableScriptScanning
 
         Add-Result `
             -Category "Web Filtering" `
@@ -1432,7 +1432,7 @@ function Test-ScriptScanning {
 # Expected = False 
 function Test-DownloadProtection {
     try {
-        $downloadProtection = Get-MpPreference | Select-Object DisableIOAVProtection
+        $downloadProtection = (Get-MpPreference).DisableIOAVProtection
 
         Add-Result `
             -Category "Web Filtering" `
@@ -1454,7 +1454,7 @@ function Test-DownloadProtection {
 # Expected = False 
 function Test-BehaviourMonitoring {
     try {
-        $behaviour = Get-MpPreference | Select-Object DisableBehaviorMonitoring
+        $behaviour = (Get-MpPreference).DisableBehaviorMonitoring
 
         Add-Result `
             -Category "Web Filtering" `
@@ -1479,7 +1479,7 @@ function Test-BehaviourMonitoring {
 # 6 = warn
 function Test-ASR {
     try {
-        $asr = Get-MpPreference | Select-Object AttackSurfaceReductionRules_Actions
+        $asr = (Get-MpPreference).AttackSurfaceReductionRules_Actions
         
         Add-Result `
             -Category "Web Filtering" `
