@@ -819,11 +819,11 @@ function Test-IPprotocol {
     try {
 
         # Check IP configuration 
-        $var = Get-ItemPropertyValue `
+        $disabledComponents = Get-ItemPropertyValue `
             -Path "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters" `
+            -Name DisabledComponents `
             -ErrorAction SilentlyContinue
 
-        $disabledComponents = $var.DisabledComponents 
         # If it is not there on the system 
         if ($null -eq  $disabledComponents) {
             Add-Result `
