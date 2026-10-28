@@ -1294,10 +1294,10 @@ function Test-OpenPorts {
         # Get what ports are open / listening
         $ports = Get-NetTCPConnection -State Listen | ForEach-Object {
             [PSCustomObject]@{
-                LocalAddress = $_.LocalAddress
                 LocalPort    = $_.LocalPort
-                ProcessID    = $_.OwningProcess
                 ProcessName  = (Get-Process -Id $_.OwningProcess -ErrorAction SilentlyContinue).ProcessName
+                ProcessID    = $_.OwningProcess
+                LocalAddress = $_.LocalAddress
             }
         } 
         # Export to CSV 
