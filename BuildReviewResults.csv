@@ -38,3 +38,4 @@
 "Security Hardening","Safe DLL Search","Enabled (1)","Property SafeDllSearchMode does not exist at path HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager.","Error"
 "Security Hardening","Always Install Elevated","Disabled (0)","Cannot find path 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\Installer' because it does not exist.","Error"
 "Security Hardening","SMBv1","Disabled","SMBv1 = Microsoft.Dism.Commands.AdvancedFeatureObject","Pass"
+"Application Control","Microsoft Store Disabled","Disabled","Policy not configured","Fail"
