@@ -11,3 +11,5 @@ TODO:
 
 
 Most recent version: BuildReviewScript1-0.ps1
+
+Ignore versions: BuildReviewScript0.1.ps1 and BuildReviewScript1.0ps1.ps1
