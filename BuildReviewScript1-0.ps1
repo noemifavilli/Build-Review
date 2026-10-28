@@ -1324,7 +1324,8 @@ Test-LSA
 Test-UAC
 Test-SafeDLLSearch
 Test-AlwaysInstallElevated
-Test-SMBv1 
+Test-SMBv1
+Test-MicrosoftStore 
 
 
 $script:AuditResults | Format-Table -AutoSize -Wrap 
