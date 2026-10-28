@@ -912,6 +912,8 @@ function Test-Laps {
     } catch {
         # Error handlig 
         Write-Host "Error laps"
+        Write-Host $_.Exception.Message
+
         Add-Result `
             -Category "Privileged Access" `
             -Check "Windows LAPS" `
