@@ -177,8 +177,8 @@ function Test-PasswordPolicy {
                         -Category "Password Policies" `
                         -Check $check.Description `
                         -Expected $check.Expected `
-                        -Actual $value `
-                        -Status $(if  ($pass) { 'Pass' } else { 'Fail' })
+                        -Actual "$check.Description = $value" `
+                        -Status $(if($pass) { 'Pass' } else { 'Fail' })
                 } # else
             } catch { # If one check fails
                 Add-Result `
@@ -1485,7 +1485,7 @@ function Test-ASR {
             -Category "Web Filtering" `
             -Check "ASR" `
             -Expected "ASR > 0" `
-            -Actual "AttackSurfaceReductionRules_Actions = $asr" `
+            -Actual "AttackSurfaceReductionRules_Actions = $asr.Count" `
             -Status $(if ($asr.Count -gt 0) { "Pass" } else { "Review" })
     } catch {
         Add-Result `
@@ -1506,13 +1506,6 @@ function Test-ASR {
 
 #     }
 # }
-
-
-
-###############  ###############
-
-    # win verified trust enabled
-    # web filtering -  explit db website check
 
 # Run the checks
 $isAdmin = ([Security.Principal.WindowsPrincipal] `
