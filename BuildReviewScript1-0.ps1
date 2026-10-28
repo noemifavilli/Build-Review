@@ -819,10 +819,22 @@ function Test-IPprotocol {
     try {
 
         # Check IP configuration 
-        $disabledComponents = Get-ItemPropertyValue `
+        $var = Get-ItemPropertyValue `
             -Path "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters" `
             -Name DisabledComponents `
             -ErrorAction SilentlyContinue
+
+        $disabledComponents = $var.DisabledComponents
+
+        # If it is not there on the system 
+        if ($null -eq  $disabledComponents) {
+            Add-Result `
+                -Category "Security Hardening" `
+                -Check "IP Protocol Configuration" `
+                -Expected "IPv4 enabled, IPv6 disabled or IPv4 preferred" `
+                -Actual "Disabled Components not configured" `
+                -Status "Review"
+        }
         
         # Check if IPv4 is enabled
         # Show what protocols are bound to network adapters
