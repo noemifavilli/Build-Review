@@ -1289,7 +1289,7 @@ function Test-MicrosoftStore {
 
 ############### Ports check ###############
 # Function will gather ports, map them to their function, and export to CSV for easier reading
-function OpenPorts {
+function Test-OpenPorts {
     try {
         # Get what ports are open / listening
         $ports = Get-NetTCPConnection -State Listen | ForEach-Object {
@@ -1361,6 +1361,7 @@ Test-SafeDLLSearch
 Test-AlwaysInstallElevated
 Test-SMBv1
 Test-MicrosoftStore 
+Test-OpenPorts
 
 
 $script:AuditResults | Format-Table -AutoSize -Wrap 
