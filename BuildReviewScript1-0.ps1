@@ -1313,6 +1313,190 @@ function Test-OpenPorts {
     }
 }
 
+############### Web Filtering ###############
+# Enable network protection: 
+# 0 = disabled / 1 = enabled / 2 = audit
+function Test-NetworkProtection {
+    try {
+        # Gather the commands answers and according to what the output is print result 
+        $NetProtection = Get-MpPreference | Select-Object EnableNetworkProtection
+
+        # According to result print pass/fail 
+        Add-Result `
+            -Category "Web Filtering" `
+            -Check "Network Protection" `
+            -Expected "Enabled (1)" `
+            -Actual $NetProtection `
+            -Status $(if ($NetProtection -eq 1) { "Pass" } if ($pua -eq 0) { "Disabled"} else { "Fail" })
+    } catch {
+        Add-Result `
+            -Category "Web Filtering" `
+            -Check "Network Protection" `
+            -Expected "Enabled (1)" `
+            -Actual $_.Exception.Message `
+            -Status "Error"
+    }
+}
+
+# Potentially Unwanted Applications check 
+# 0 = disabled / 1 = block / 2 = audit
+function Test-PUA {
+    try {
+        # Gather data 
+        $pua = Get-MpPreference | Select-Object PUAProtection
+
+        Add-Result `
+            -Category "Web Filtering" `
+            -Check "Potentially Unwanted Applications" `
+            -Expected "Blocked (1)" `
+            -Actual $pua `
+            -Status $(if ($pua -eq 1) { "Pass" } if ($pua -eq 0) { "Disabled" } else { "Fail" })
+
+    } catch {
+        Add-Result `
+            -Category "Web Filtering" `
+            -Check "Potentially Unwanted Applications" `
+            -Expected "Blocked (1)" `
+            -Actual $_.Exception.Message `
+            -Status "Error"
+    }
+}
+
+# Controlled Folder Access 
+#  0 = disabled / 1 = enabled / 2 = audit 
+function Test-FolderAccess {
+    try {
+        $cfa = Get-MpPreference | Select-Object EnableControlledFolderAccess
+
+        Add-Result `
+                -Category "Web Filtering" `
+                -Check "Controlled Folder Access" `
+                -Expected "Enabled (1)" `
+                -Actual $cfa `
+                -Status $(if ($cfa -eq 1) { "Pass" } if ($pua -eq 0) { "Disabled" } else { "Fail" })
+    } catch {
+        Add-Result `
+                -Category "Web Filtering" `
+                -Check "Controlled Folder Access" `
+                -Expected "Enabled (1)" `
+                -Actual $_.Exception.Message `
+                -Status "Error"
+    }
+}
+
+# Real Time protection 
+# if False = Real time protection enabled  
+function Test-RealTimeProtection {
+    try {
+        $RealTime = Get-MpPreference | Select-Object DisableRealtimeMonitoring
+
+         Add-Result `
+                -Category "Web Filtering" `
+                -Check "Real Time Protection" `
+                -Expected "False (Enabled)" `
+                -Actual $RealTime `
+                -Status $(if ($cfa -eq $false) { "Pass" } else { "Fail" })
+    } catch {
+        Add-Result `
+                -Category "Web Filtering" `
+                -Check "Real Time Protection" `
+                -Expected "False (Enabled)" `
+                -Actual $_.Exception.Message `
+                -Status "Error"
+    }
+}
+
+# Script Scanning
+# Expected = False 
+function Test-ScriptScanning {
+    try {
+        $scriptScan = Get-MpPreference | Select-Object DisableScriptScanning
+
+        Add-Result `
+            -Category "Web Filtering" `
+            -Check "Script Scanning" `
+            -Expected "False (Enabled)" `
+            -Actual $scriptScan `
+            -Status $(if ($scriptScan -eq $false) { "Pass" } else { "Fail" })
+    } catch {
+        Add-Result `
+                -Category "Web Filtering" `
+                -Check "Script Scanning" `
+                -Expected "False (Enabled)" `
+                -Actual $_.Exception.Message `
+                -Status "Error"
+    }
+}
+
+# Download protection
+# Expected = False 
+function Test-DownloadProtection {
+    try {
+        $downloadProtection = Get-MpPreference | Select-Object DisableIOAVProtection
+
+        Add-Result `
+            -Category "Web Filtering" `
+            -Check "Download Protection" `
+            -Expected "False (Enabled)" `
+            -Actual $downloadProtection `
+            -Status $(if ($downloadProtection -eq $false) { "Pass" } else { "Fail" })
+    } catch {
+        Add-Result `
+                -Category "Web Filtering" `
+                -Check "Download Protection" `
+                -Expected "False (Enabled)" `
+                -Actual $_.Exception.Message `
+                -Status "Error"
+    }
+}
+
+# Behaviour Monitoring 
+# Expected = False 
+function Test-BehaviourMonitoring {
+    try {
+        $behaviour = Get-MpPreference | Select-Object DisableBehaviorMonitoring
+
+        Add-Result `
+            -Category "Web Filtering" `
+            -Check "Behaviour Monitoring" `
+            -Expected "False (Enabled)" `
+            -Actual $behaviour `
+            -Status $(if ($behaviour -eq $false) { "Pass" } else { "Fail" })
+    } catch {
+        Add-Result `
+                -Category "Web Filtering" `
+                -Check "Behaviour Monitoring" `
+                -Expected "False (Enabled)" `
+                -Actual $_.Exception.Message `
+                -Status "Error"
+    }
+}
+
+# Attack Surface Reduction
+#  0 = disabled 
+# 1 = block
+# 2 = audit 
+# 6 = warn
+function Test-ASR {
+    try {
+        $asr = Get-MpPreference | Select-Object AttackSurfaceReductionRules_Actions
+        
+        Add-Result `
+            -Category "Web Filtering" `
+            -Check "ASR" `
+            -Expected "ASR > 0" `
+            -Actual $asr `
+            -Status $(if ($asr.Count -gt 0) { "Pass" } else { "Review" })
+    } catch {
+        Add-Result `
+            -Category "Web Filtering" `
+            -Check "ASR" `
+            -Expected "ASR > 0" `
+            -Actual $_.Exception.Message `
+            -Status "Error"
+    }
+}
+
 ############### Windows Verified Trust ###############
 # function Test-WinVerTrust {
 #     try {
@@ -1323,7 +1507,8 @@ function Test-OpenPorts {
 #     }
 # }
 
-############### Web Filtering ###############
+
+
 ###############  ###############
 
     # win verified trust enabled
@@ -1360,7 +1545,8 @@ Test-AlwaysInstallElevated
 Test-SMBv1
 Test-MicrosoftStore 
 Test-OpenPorts
-
+Test-NetworkProtection
+Test-PUA
 
 $script:AuditResults | Format-Table -AutoSize -Wrap 
 $script:AuditResults | Export-Csv (Join-Path $PSScriptRoot 'BuildReviewResults.csv') -NoTypeInformation
