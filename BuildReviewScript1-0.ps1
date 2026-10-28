@@ -1287,6 +1287,41 @@ function Test-MicrosoftStore {
 
 }
 
+############### Ports check ###############
+# Function will gather ports, map them to their function, and export to CSV for easier reading
+function OpenPorts {
+    try {
+        # Get what ports are open / listening
+        $ports = Get-NetTCPConnection -State Listen | ForEach-Object {
+            [PSCustomObject]@{
+                LocalAddress = $_.LocalAddress
+                LocalPort    = $_.LocalPort
+                ProcessID    = $_.OwningProcess
+                ProcessName  = (Get-Process -Id $_.OwningProcess -ErrorAction SilentlyContinue).ProcessName
+            }
+        } 
+        # Export to CSV 
+        $ports | Export-Csv OpenPorts.csv -NoTypeInformation
+
+        # Still write something in the reuslts file 
+        Add-Result `
+            -Category "Network Security" `
+            -Check "Open Ports" `
+            -Expected "Open ports exported to CSV file: OpenPorts.csv" `
+            -Actual "$($ports.Count) listening ports exported to OpenPorts.csv" `
+            -Status "Pass"
+
+    } catch {
+
+        Write-Warning "Failed to export open ports: $($_.Exception.Message)"
+        Add-Result `
+            -Category "Network Security" `
+            -Check "Open Ports" `
+            -Expected "CSV Generated" `
+            -Actual $_.Exception.Message `
+            -Status "Fail"
+    }
+}
 
 ############### Web Filtering ###############
 ###############  ###############
