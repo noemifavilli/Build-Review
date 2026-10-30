@@ -1496,7 +1496,7 @@ function Test-ASR {
             -Category "Web Filtering" `
             -Check "ASR" `
             -Expected "ASR > 0" `
-            -Actual "AttackSurfaceReductionRules_Actions = $asr.Count" `
+            -Actual "AttackSurfaceReductionRules_Actions = $($asr.Count) ASR rule(s) configured" `
             -Status $(if ($asr.Count -gt 0) { "Pass" } else { "Review" })
     } catch {
         Add-Result `
