@@ -1184,7 +1184,7 @@ function Test-AlwaysInstallElevated {
         $path = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Installer"
 
         # Variable requried 
-        $alwaysInstall = Get-ItemPropertyValue `
+        $alwaysInstall = Get-ItemProperty `
             -Path $path `
             -ErrorAction Stop
 
@@ -1198,8 +1198,10 @@ function Test-AlwaysInstallElevated {
                 -Expected "Disabled (0)" `
                 -Actual "Always Install Elevated was not configured" `
                 -Status "Error"
+
+            return
         } 
-        continue 
+         
 
         # If the variable is not missing 
         Add-Result `
