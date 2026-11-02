@@ -33,7 +33,7 @@
     # safe dll search mode done
     # always install elevated disabled done
     # smbv1 done
-    # win verified trust enabled
+    # win verified trust enabled done
     # open ports PS whats open / whjat shoukd be open / wht shouldn't done
     # microsfot store disabled done
     # web filtering -  explit db website check done 
@@ -819,7 +819,7 @@ function Test-IPprotocol {
     try {
 
         # Check IP configuration 
-        $disabledComponents = Get-ItemPropertyValue `
+        $disabledComponents = Get-ItemProperty `
             -Path "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters" `
             -Name DisabledComponents `
             -ErrorAction SilentlyContinue
