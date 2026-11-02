@@ -47,4 +47,3 @@
 "Web Filtering","Download Protection","False (Enabled)","DisableIOAVProtection = False","Pass"
 "Web Filtering","Behaviour Monitoring","False (Enabled)","DisableBehaviorMonitoring = False","Pass"
 "Web Filtering","ASR","ASR > 0","AttackSurfaceReductionRules_Actions = 0 ASR rule(s) configured","Review"
-"Network Security","Open Ports","Open ports exported to CSV file: OpenPorts.csv","23 listening ports exported to OpenPorts.csv","Review"
