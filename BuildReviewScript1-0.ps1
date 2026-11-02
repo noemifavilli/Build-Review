@@ -821,7 +821,6 @@ function Test-IPprotocol {
         # Check IP configuration 
         $key = Get-ItemProperty `
             -Path "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters" `
-            -Name DisabledComponents `
             -ErrorAction SilentlyContinue
 
         $disabledComponents = $key.DisabledComponents
@@ -904,7 +903,7 @@ function Test-LocalAdmin {
 function Test-Laps {
     try {
         # Gather Laps data
-        $laps = Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Policies\LAPS' -ErrorAction Stop
+        $laps = Get-ItemProperty 'HKLM:\Software\Microsoft\Windows\CurrentVersion\Policies\LAPS' -ErrorAction Stop
 
         # Properties to pass checks 
         $pass = ($laps.BackupDirectory -ge 1 -and
