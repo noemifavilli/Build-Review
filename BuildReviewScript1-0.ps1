@@ -1197,7 +1197,7 @@ function Test-AlwaysInstallElevated {
                 -Check "Always Install Elevated" `
                 -Expected "Disabled (0)" `
                 -Actual "Always Install Elevated was not configured" `
-                -Status "Error"
+                -Status "Review"
 
             return
         } 
