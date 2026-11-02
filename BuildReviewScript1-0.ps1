@@ -177,7 +177,7 @@ function Test-PasswordPolicy {
                         -Category "Password Policies" `
                         -Check $check.Description `
                         -Expected $check.Expected `
-                        -Actual $value `
+                        -Actual "$check.Description: $value" `
                         -Status $(if($pass) { 'Pass' } else { 'Fail' })
                 } # else
             } catch { # If one check fails
