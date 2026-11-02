@@ -24,7 +24,7 @@
 "Security Hardening","USB Storage","Disabled (Start = 4)","Start = 3","Fail"
 "Security Hardening","BitLocker (C:)","Protection Enabled","Protection Status: Off","Fail"
 "Security Policies","WDAC Configuration","WDAC policy present","No active WDAC policies found","Fail"
-"Security Hardening","IP Protocol Configuration","Protocol settings retrievable","Property DisabledComponents does not exist at path HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters.","Error"
+"Security Hardening","IP Protocol Configuration","IPv4 enabled, IPv6 disabled or IPv4 preferred","Disabled Components not configured","Review"
 "Privileged Access","Local Admin Membership","Only authorised members","labwin11-1\Administrator","Manual Review"
 "Privileged Access","Local Admin Membership","Only authorised members","labwin11-1\fspadmin","Manual Review"
 "Privileged Access","Local Admin count","Not more than 4 admins","2 Administrators","Pass"
