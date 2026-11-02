@@ -1140,7 +1140,6 @@ function Test-SafeDLLSearch {
         $path = "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager"
         $dll = Get-ItemProperty `
             -Path $path `
-            -Name SafeDllSearchMode `
             -ErrorAction Stop
         
         $valid = $dll.SafeDllSearchMode    
@@ -1151,8 +1150,10 @@ function Test-SafeDLLSearch {
             -Category "Security Hardening" `
             -Check "Safe DLL Search" `
             -Expected "Enabled (1)" `
-            -Actual "Not Configured" `
+            -Actual "SafeDllSearchMode =Not Configured" `
             -Status "Error"
+
+            return
         } 
 
         # Display results 
@@ -1160,8 +1161,8 @@ function Test-SafeDLLSearch {
             -Category "Security Hardening" `
             -Check "Safe DLL Search" `
             -Expected "Enabled (1)" `
-            -Actual "SafeDllSearchMode = $dll" `
-            -Status $(if ($dll -eq 1) { "Pass" } else { "Fail" })
+            -Actual "SafeDllSearchMode = $valid" `
+            -Status $(if ($valid -eq 1) { "Pass" } else { "Fail" })
 
     } catch {
         Add-Result `
@@ -1186,11 +1187,12 @@ function Test-AlwaysInstallElevated {
         # Variable requried 
         $alwaysInstall = Get-ItemPropertyValue `
             -Path $path `
-            -Name AlwaysInstallElevated `
             -ErrorAction Stop
+
+        $value = $alwaysInstall.AlwaysInstallElevated
         
         # If the variable is missing 
-        if ($null -eq $alwaysInstall) {
+        if ($null -eq $value) {
             Add-Result `
                 -Category "Security Hardening" `
                 -Check "Always Install Elevated" `
@@ -1205,8 +1207,8 @@ function Test-AlwaysInstallElevated {
             -Category "Security Hardening" `
             -Check "Always Install Elevated" `
             -Expected "Disabled (0)" `
-            -Actual "AlwaysInstallElevated = $alwaysInstall" `
-            -Status $(if ($alwaysInstall -eq 0) { "Pass" } else { "Fail" })
+            -Actual "AlwaysInstallElevated = $value" `
+            -Status $(if ($value -eq 0) { "Pass" } else { "Fail" })
         
     } catch {
         Add-Result `
