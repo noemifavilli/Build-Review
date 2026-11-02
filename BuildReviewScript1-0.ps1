@@ -30,13 +30,13 @@
     # rdp enabled done
     # lsa prtoection ! enabled done 
     # user acc cont (uac) enabled done 
-    # safe dll search mode 
+    # safe dll search mode done
     # always install elevated disabled done
-    # smbv1
+    # smbv1 done
     # win verified trust enabled
-    # open ports PS whats open / whjat shoukd be open / wht shouldn't 
-    # microsfot store disabled
-    # web filtering -  explit db website check
+    # open ports PS whats open / whjat shoukd be open / wht shouldn't done
+    # microsfot store disabled done
+    # web filtering -  explit db website check done 
 
 # Initilise array
 $script:AuditResults = @() 
@@ -1509,18 +1509,57 @@ function Test-ASR {
 }
 
     # win verified trust enabled
-    # open ports PS whats open / whjat shoukd be open / wht shouldn't 
 
 ############### Windows Verified Trust ###############
-# function Test-WinVerTrust {
-#     try {
+# Shoould be enabled = 1
+function Test-WinVerTrust {
+    try {
+        $paths = @( 
+            'HKLM:\Software\Microsoft\Cryptography\Wintrust\Config',
+            'HKLM:\SOFTWARE\WOW6432Node\Microsoft\Cryptography\Wintrust\Config'
+        )
 
-#      #  $wintrust = 
-#     } catch {
+        # Keep track if paths exist or not
+         $foundPath = $false
 
-#     }
-# }
+        foreach ($path in $paths) {
 
+            if (Test-Path $path) {
+
+                # Set value to true if paths have been found
+                $foundPath = $true
+
+                $value = Get-ItemPropertyValue `
+                    -Path $path `
+                    -Name EnableCertPaddingCheck `
+                    -ErrorAction SilentlyContinue
+
+                Add-Result `
+                    -Category "Security Hardening" `
+                    -Check "Windows Verified Trust" `
+                    -Expected "Enabled (1)" `
+                    -Actual "EnableCertPaddingCheck = $value" `
+                    -Status $(if ($value -eq 1) { "Pass" } else { "Fail" })
+            }
+        }
+        # If path doesn't exist
+        if (-not $foundPath) {
+            Add-Result `
+                -Category "Security Hardening" `
+                -Check "Windows Verified Trust" `
+                -Expected "Enabled (1)" `
+                -Actual "Wintrust\Config path not found" `
+                -Status "Review"
+        }
+    } catch {
+        Add-Result `
+            -Category "Security Hardening" `
+            -Check "Windows Verified Trust" `
+            -Expected "Enabled (1)" `
+            -Actual $_.Exception.Message `
+            -Status "Error"
+    }
+}
 # Run the checks
 $isAdmin = ([Security.Principal.WindowsPrincipal] `
     [Security.Principal.WindowsIdentity]::GetCurrent()
@@ -1560,6 +1599,7 @@ Test-ScriptScanning
 Test-DownloadProtection
 Test-BehaviourMonitoring
 Test-ASR
+Test-WinVerTrust
 
 
 $script:AuditResults | Format-Table -AutoSize -Wrap 
