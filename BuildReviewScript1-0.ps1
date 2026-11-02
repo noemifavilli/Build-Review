@@ -1511,42 +1511,6 @@ function Test-ASR {
     # win verified trust enabled
     # open ports PS whats open / whjat shoukd be open / wht shouldn't 
 
-############### Open Ports review ###############
-# Function that will gather all open ports and export to CSV for easier reading
-function Test-Ports {
-    try {
-        $ports = Get-NetTCPConnection -State Listen | ForEach-Object {
-            $process = Get-Process `
-                -ID $_.OwningProcess `
-                -ErrorAction SilentlyContinue
-            
-            [PSCustomObject]@{
-                LocalPort    = $_.LocalPort
-                ProcessName  = $process.ProcessName
-                LocalAddress = $_.LocalAddress
-            }
-        }
-
-        # Export to CSV
-        $ports | Export-Csv OpenPorts.csv -NoTypeInformation
-
-        # Add result 
-        Add-Result `
-            -Category "Network Security" `
-            -Check "Open Ports" `
-            -Expected "Open ports exported to CSV file: OpenPorts.csv" `
-            -Actual "$($ports.Count) listening ports exported to OpenPorts.csv" `
-            -Status "Review"
-    } catch {
-        Add-Result `
-            -Category "Network Security" `
-            -Check "Open Ports" `
-            -Expected "CSV Generated" `
-            -Actual $_.Exception.Message `
-            -Status "Fail"
-    }
-}
-
 ############### Windows Verified Trust ###############
 # function Test-WinVerTrust {
 #     try {
@@ -1596,7 +1560,7 @@ Test-ScriptScanning
 Test-DownloadProtection
 Test-BehaviourMonitoring
 Test-ASR
-Test-Ports
+
 
 $script:AuditResults | Format-Table -AutoSize -Wrap 
 $script:AuditResults | Export-Csv (Join-Path $PSScriptRoot 'BuildReviewResults.csv') -NoTypeInformation
