@@ -46,4 +46,4 @@
 "Web Filtering","Script Scanning","False (Enabled)","DisableScriptScanning = False","Pass"
 "Web Filtering","Download Protection","False (Enabled)","DisableIOAVProtection = False","Pass"
 "Web Filtering","Behaviour Monitoring","False (Enabled)","DisableBehaviorMonitoring = False","Pass"
-"Web Filtering","ASR","ASR > 0","AttackSurfaceReductionRules_Actions = .Count","Review"
+"Web Filtering","ASR","ASR > 0","AttackSurfaceReductionRules_Actions = 0 ASR rule(s) configured","Review"
