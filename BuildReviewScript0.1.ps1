@@ -1,3 +1,11 @@
+
+#  Build Review Script for cyber passport
+
+#  v0.1 demonstrated on 20/10/2026
+# 
+
+############## for v0.1 ##############
+
     # script perfroms secruity checks for a build review, including:
     # password policies - done
     # file shares - done
@@ -13,15 +21,15 @@
 
 ############## for v1.0 ##############
     
-    # local admin on syst
-    # max admin (4) and domain admin 
-    # disabled ipv6 , ipv4 enabled/preferred 
-    # laps 
-    # multicast network resolution protools enabled? 3
-    # nla net lev auth - required 
-    # rdp enabled 
-    # lsa prtoection ! enabled 
-    # user acc cont (uac) enabled 
+    # disabled ipv6 , ipv4 enabled/preferred done 
+    # local admin on syst done 
+    # max admin (4) and domain admin, together with above check done
+    # laps done
+    # multicast network resolution protools enabled? 3 done 
+    # nla net lev auth - required done 
+    # rdp enabled done
+    # lsa prtoection ! enabled done 
+    # user acc cont (uac) enabled done 
     # safe dll search mode 
     # always install elevated disabled
     # smbv1
@@ -356,14 +364,14 @@ function Test-ThirdPartyApp {
         }
 
         # Export all apps
-        $data | Export-Csv data.csv -NoTypeInformation
+        $data | Export-Csv ThirdPartyData.csv -NoTypeInformation
 
         # Export results
         Add-Result `
             -Category "Third Party Applications" `
             -Check "Application Inventory" `
             -Expected "Inventory exported for review" `
-            -Actual "$($data.Count) applications exported to data.csv" `
+            -Actual "$($data.Count) applications exported to ThirdPartyData.csv" `
             -Status "Pass"
     } catch {
          Add-Result `
@@ -500,7 +508,7 @@ function Test-Firewall {
                 -Check "$($fire.Name) Profile" `
                 -Expected "Enabled and Default Inbound Action = Block" `
                 -Actual "Enabled: $($fire.Enabled), Inbound: $($fire.DefaultInboundAction)" `
-                -Status $(if ($fire.Enabled -and $fire.DefaultInboundAction -eq 'Block') 
+                -Status $(if ($fire.Enabled -and $fire.DefaultInboundAction -ne 'Allow') 
                 { 'Pass' } else { 'Fail' })
         }
     } catch {
@@ -772,19 +780,27 @@ function Test-BitLocker {
 # Policies folder C:\Windows\System32\CodeIntegrity\CIPolicies\Active
 function Test-WDAC {
     try {
-        $wdacPolicy =Get-ChildItem ` "C:\Windows\System32\CodeIntegrity\CiPolicies\Active\" `
-            -Filter *.cip `
-            -ErrorAction SilentlyContinue
+        $wdacPolicy = @(Get-ChildItem `
+            -Path "C:\Windows\System32\CodeIntegrity\CiPolicies\Active\" `
+            -Filter "*.cip" `
+            -ErrorAction SilentlyContinue)
 
         # Double check there is the WDAC policy
-        if ($wdacPolicy) {
+        if ($wdacPolicy -gt 0) {
 
             Add-Result `
                 -Category "Security Policies" `
                 -Check "WDAC Configuration" `
                 -Expected "WDAC policy present" `
-                -Actual "$($wdacPolicies.Count) policy file(s) found" `
-                -Status "Pass"
+                -Actual "$($wdacPolicy.Count) policy file(s) found" `
+                -Status  if $($)"Pass"
+        } else {
+            Add-Result `
+                -Category "Security Policies" `
+                -Check "WDAC Configuration" `
+                -Expected "WDAC policy present" `
+                -Actual "No active policies found" `
+                -Status "Fail"
         }
     }
     catch {
@@ -798,6 +814,388 @@ function Test-WDAC {
     }
 }
 
+############### IPv6 disabled and IPv4 enabled ###############
+function Test-IPprotocol {
+    try {
+
+        # Check IP configuration 
+        $disabledComponents = Get-ItemPropertyValue `
+            -Path "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters" `
+            -Name DisabledComponents `
+            -ErrorAction SilentlyContinue
+        
+        # Check if IPv4 is enabled
+        # Show what protocols are bound to network adapters
+        # ms_tcpip = ipv4 
+        # if any adapters are using IPv4 then it is set to true 
+        $IPv4enabled = ( Get-NetAdapterBinding ` -ComponentID ms_tcpip).Enabled -contains $true
+        # Check if IPv4/6 are disabled/preferred
+        # 0xFF is 255 in decimal - this disables IPv6 in the system
+        $IPv6disabled = ($disabledComponents -eq 0xFF)
+        # 0x20 is 32 in decimals - also means to prefer the IPv4 over IPV6
+        $IPv4preferred = ($disabledComponents -eq 0x20)
+        
+        # Check whether IPv4 is enabled and/or Ipv6 disabled/IPv4 preferred 
+        Add-Result `
+            -Category "Security Hardening" `
+            -Check "IP Protocol Configuration" `
+            -Expected "IPv4 enabled, IPv6 disabled or IPv4 preferred" `
+            -Actual "IPv4 Enabled: $ipv4Enabled, DisabledComponents: $disabledComponents" `
+            -Status $(if ($ipv4Enabled -and ($ipv6Disabled -or $ipv4Preferred)) { "Pass" } else { "Fail" })
+
+    } catch {
+        Add-Result `
+            -Category "Security Hardening" `
+            -Check "IP Protocol Configuration" `
+            -Expected "Protocol settings retrievable" `
+            -Actual $_.Exception.Message `
+            -Status "Error"
+    }
+}
+
+############### Local admin on system ###############
+# and check there is max 4 admins on system
+function Test-LocalAdmin {
+    try {
+        # Get all of approved memebers
+        $ApprovedMembers = Get-LocalGroupMember -Group "Administrators" -ErrorAction Stop
+
+        # Loop through them alland add them to the csv 
+        foreach ($member in $ApprovedMembers) {
+            Add-Result `
+                -Category "Privileged Access" `
+                -Check "Local Admin Membership" `
+                -Expected "Only authorised members" `
+                -Actual $member.Name `
+                -Status "Manual Review"
+        }
+        
+        # Check how many admins there are 
+        Add-Result `
+            -Category "Privileged Access" `
+            -Check "Local Admin count" `
+            -Expected "Not more than 4 admins" `
+            -Actual "$($ApprovedMembers.Count) Administrators" `
+            -Status $(if ($ApprovedMembers.Count -le 4) { "Pass" } else { "Fail" })
+
+    } catch {
+        Add-Result `
+            -Category "Privileged Access" `
+            -Check "Local Administrator Enumeration" `
+            -Expected "Administrators group retrieved successfully" `
+            -Actual $_.Exception.Message `
+            -Status "Error"
+    }
+}
+
+############### LAPS (Local Admin Pasword Solutions) ###############
+function Test-Laps {
+    try {
+        # Gather Laps data
+        $laps = Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Policies\LAPS' -ErrorAction Stop
+
+        # Properties to pass checks 
+        $pass = ($laps.BackupDirectory -ge 1 -and
+                $laps.PasswordLength -gt 12 -and
+                $laps.PasswordAgeDays -le 30
+        )
+
+        # Print results and check if the configurations pass the checks 
+        Add-Result `
+            -Category "Privileged Access" `
+            -Check "LAPS implementation" `
+            -Expected "Configured and enabled" `
+            -Actual "Account = $($laps.AdminstratorAccountName), password length = $($laps.PasswordLength),
+                    password age = $($laps)"
+            -Status $(if ($pass) { "Pass" } else { "Fail" })
+
+    } catch {
+        # Error handlig 
+        Write-Host "Error laps"
+        Add-Result `
+            -Category "Privileged Access" `
+            -Check "Windows LAPS" `
+            -Expected "Configured and enabled" `
+            -Actual "LAPS policy not configured" `
+            -Status "Fail"
+    }
+}
+
+############### Multicast name resolution enabled ###############
+# 0 = Disabled and 1 = Enabled Missing = Not Configured 
+function Test-NameResolution {
+    try {
+        # Path where the settings and configuration for this check should be 
+        $path = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\DNSClient"
+
+        # Check if the path exist as it does not exist on my machine 
+        if (-not (Test-Path $path)) {
+            Add-Result `
+                -Category "Security Hardening" `
+                -Check "Multicast Name Resolution" `
+                -Expected "Disabled" `
+                -Actual "No DNSClient path exists" `
+                -Status "Review"
+            return
+        }
+
+        continue 
+
+        # If path exists
+        # Retrieve data 
+        $config = Get-ItemPropertyValue `
+            -Path $path `
+            -ErrorAction SilentlyContinue
+
+            # Add result 
+            Add-Result `
+                -Category "Security Hardening" `
+                -Check "Multicast Name Resolution" `
+                -Expected "Disabled (0)" `
+                -Actual "$config" `
+                -Status $(if ($config -eq 0) { "Pass" } else { "Fail" })
+    } catch {
+           Add-Result `
+                -Category "Security Hardening" `
+                -Check "LLMNR" `
+                -Expected "Configuration retrievable" `
+                -Actual $_.Exception.Message `
+                -Status "Error" 
+    }
+}
+
+############### Network Level Authentication (NLA) ###############
+# It is required, and when enabled it has value of 1 
+# in: HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp
+function Test-NLA {
+    try {
+        # Path to settings 
+        $path = "HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp"
+
+        # Variable gathering 
+        $nla = Get-ItemPropertyValue `
+            -Path $path `
+            -Name userAuthentication `
+            -ErrorAction Stop
+        
+        # Add result 
+        Add-Result `
+            -Category "Remote Access" `
+            -Check "Netowrk Level Authentication" `
+            -Expected "Enabled (1)" `
+            -Actual "userAuthentication = $nla" `
+            -Status $(if ($nla -eq 1) { "Pass" } else { "Fail" })       
+    } catch {
+        Add-Result `
+            -Category "Remote Access" `
+            -Check "Network Level Authentication" `
+            -Expected "Configuration retrievable" `
+            -Actual $_.Exception.Message `
+            -Status "Error"
+    }
+}
+
+############### Remot Desktop Protocol ###############
+# Needs to be enabled = 0 
+# I disabled = 1 
+# -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name fDenyTSConnections
+function Test-RDP {
+    try {
+        # Path to configurations 
+        $path = "HKLM:\System\CurrentControlSet\Control\Terminal Server"
+
+        # Variable gathering 
+        $rdp = Get-ItemPropertyValue `
+            -Path $path `
+            -Name fDenyTSConnections `
+            -ErrorAction Stop
+        
+        # Add to standardised output format     
+        Add-Result `
+            -Category "Remote Access" `
+            -Check "Remote Desktop Protocol" `
+            -Expected "Enabled (0)" `
+            -Actual "fDenyTSConnections = $rdp" `
+            -Status $(if ($nla -eq 0) { "Pass" } else { "Fail"} )
+    } catch {
+        Add-Result `
+            -Category "Remote Access" `
+            -Check "Remote Desktop Protocol" `
+            -Expected "Configuration retrievable" `
+            -Actual $_.Exception.Message `
+            -Status "Error"
+    }
+}
+
+############### Local Security Authority (LSA) ###############
+# should be enabled = 1 
+# disabled = 0
+function Test-LSA {
+    try {
+        # Get path and variable value from settings 
+        $path = "HKLM:\System\CurrentControlSet\Control\Lsa"
+        $lsa = Get-ItemPropertyValue `
+            -Path $path `
+            -Name RunAsPPL `
+            -ErrorAction Stop
+        
+        # If it is equal to null / doesn't exist then throw an error
+        if ($null -eq $lsa) {
+            Add-Result `
+                -Category "Security Hardening" `
+                -Check "Local Security Authority" `
+                -Expected "Enabled (1)" `
+                -Actual "LSA not existent on system" `
+                -Status "Error"
+        }    
+
+        # Otherwise display configuration 
+        Add-Result `
+            -Category "Security Hardening" `
+            -Check "Local Security Authority" `
+            -Expected "Enabled (1)" `
+            -Actual "RunAsPPL = $lsa" `
+            -Status $(if ($lsa -eq 0) { "Pass" }  else { "Fail" })
+    } catch {
+         Add-Result `
+            -Category "Security Hardening" `
+            -Check "Local Security Authority" `
+            -Expected "Enabled (1)" `
+            -Actual $_.Exception.Message `
+            -Status "Error"
+    }
+}
+
+############### User Account Control (UAC) ###############
+# Function that asks for permission before any chamges are done to the device
+# Enabled = 1
+# Disabled = 0 
+function Test-UAC {
+    try {
+        # Get path and varibale from settings 
+        $path = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System"
+        $uac = Get-ItemPropertyValue `
+            -Path $path `
+            -Name EnableLUA `
+            -ErrorAction Stop
+        
+        # Display results 
+         Add-Result `
+            -Category "Security Hardening" `
+            -Check "User Account Control" `
+            -Expected "Enabled (1)" `
+            -Actual "EnableLUA = $uac" `
+            -Status $(if ($uac -eq 1) { "Pass" }  else { "Fail" })
+    } catch {
+        Add-Result `
+            -Category "Security Hardening" `
+            -Check "User Account Control" `
+            -Expected "Enabled (1)" `
+            -Actual $_.Exception.Message `
+            -Status "Error"
+    }
+}
+
+############### Safe DLL Search ###############
+# Enabled =1 and Disabled = 0 
+function Test-SafeDLLSearch {
+    try {
+        # Gather path and variable
+        $path = "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager"
+        $dll = Get-ItemPropertyValue `
+            -Path $path `
+            -Name SafeDllSearchMode `
+            -ErrorAction Stop
+    
+        # check if it exists     
+        if ($null -eq $dll) {
+            Add-Result `
+            -Category "Security Hardening" `
+            -Check "User Account Control" `
+            -Expected "Enabled (1)" `
+            -Actual "Not Configured" `
+            -Status "Error"
+        } 
+
+        # Display results 
+        Add-Result `
+            -Category "Security Hardening" `
+            -Check "Safe DLL Search" `
+            -Expected "Enabled (1)" `
+            -Actual "SafeDllSearchMode = $dll" `
+            -Status $(if ($dll -eq 1) { "Pass" } else { "Fail" })
+
+    } catch {
+        Add-Result `
+            -Category "Security Hardening" `
+            -Check "User Account Control" `
+            -Expected "Enabled (1)" `
+            -Actual $_.Exception.Message `
+            -Status "Error"
+    }
+}
+
+
+############### Always Install Elevated ###############
+# Function that if enabled a standard user can execute installs with SYSTEM privileged
+# This leads to privilege escalation aas code can be executed as NT AUTHORITY/SYSTEM - higher level of privilege on system 
+# Should be disabled = 0
+function Test-AlwaysInstallElevated {
+    try {
+        # Path in system
+        $path = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Installer"
+
+        # Variable requried 
+        $alwaysInstall = Get-ItemPropertyValue `
+            -Path $path `
+            -Name AlwaysInstallElevated `
+            -ErrorAction Stop
+        
+        # If the variable is missing 
+        if ($null -eq $alwaysInstall) {
+            Add-Result `
+                -Category "Security Hardening" `
+                -Check "Always Install Elevated" `
+                -Expected "Disabled (0)" `
+                -Actual "Always Install Elevated was not configured" `
+                -Status "Error"
+        } 
+        continue 
+
+        # If the variable is not missing 
+        Add-Result `
+            -Category "Security Hardening" `
+            -Check "Always Install Elevated" `
+            -Expected "Disabled (0)" `
+            -Actual "AlwaysInstallElevated = $alwaysInstall" `
+            -Status $(if ($alwaysInstall -eq 0) { "Pass" } else { "Fail" })
+        
+    } catch {
+        Add-Result `
+            -Category "Security Hardening" `
+            -Check "Always Install Elevated" `
+            -Expected "Disabled (0)" `
+            -Actual $_.Exception.Message `
+            -Status "Error"
+    }
+}
+
+
+
+
+
+############### SMBv1 ###############
+############### Windows Verified Trust ###############
+############### Microsfot Store Disabled ###############
+############### Web Filtering ###############
+###############  ###############
+
+
+    # smbv1
+    # win verified trust enabled
+    # open ports PS whats open / whjat shoukd be open / wht shouldn't 
+    # microsfot store disabled
+    # web filtering -  explit db website check
 
 # Run the checks
 $isAdmin = ([Security.Principal.WindowsPrincipal] `
@@ -817,6 +1215,17 @@ Test-WeakPasswords
 Test-USBPolicy
 Test-BitLocker
 Test-WDAC
+Test-IPprotocol
+Test-LocalAdmin
+Test-LAPS
+Test-NameResolution
+Test-NLA
+Test-RDP
+Test-LSA
+Test-UAC
+Test-SafeDLLSearch
+Test-AlwaysInstallElevated
 
-$script:AuditResults | Format-Table -AutoSize
+
+$script:AuditResults | Format-Table -AutoSize -Wrap 
 $script:AuditResults | Export-Csv (Join-Path $PSScriptRoot 'BuildReviewResults.csv') -NoTypeInformation
