@@ -827,6 +827,7 @@ function Test-IPprotocol {
             -ErrorAction SilentlyContinue
 
         $disabledComponents = $key.DisabledComponents
+        
         # If it is not there on the system 
         if ($null -eq  $disabledComponents) {
             Add-Result `
