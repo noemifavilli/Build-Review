@@ -478,11 +478,14 @@ function Test-Accounts {
                     }
                 }
 
+                # Check if the last logon is null, and if so, set it to never 
+                $lastLogon = if ($null -ne $user.LastLogon) {$user.LastLogon} else {"Never"}
+
                 Add-Result `
                     -Category "Accounts" `
                     -Check $accountType `
                     -Expected $expected `
-                    -Actual "Name: $($user.Name), Enabled: $($user.Enabled), Last Logon: $($user.LastLogon)" `
+                    -Actual "Name: $($user.Name), Enabled: $($user.Enabled), Last Logon: $($lastLogon)" `
                     -Status $status
             }
         }
@@ -1183,6 +1186,15 @@ function Test-AlwaysInstallElevated {
         # Path in system
         $path = "HKLM:\Software\Policies\Microsoft\Windows\Installer"
 
+        if (Test-Path $path -eq $false) {
+            Add-Result `
+                -Category "Security Hardening" `
+                -Check "Always Install Elevated" `
+                -Expected "Disabled (0)" `
+                -Actual "Installer path not found" `
+                -Status "Review"
+            return
+        }
         # Variable requried 
         $alwaysInstall = Get-ItemProperty `
             -Path $path `
@@ -1240,7 +1252,7 @@ function Test-SMBv1 {
                 -Category "Security Hardening" `
                 -Check "SMBv1" `
                 -Expected "Disabled" `
-                -Actual "SMBv1 = $smb.State" `
+                -Actual "SMBv1 = $($smb.State)" `
                 -Status "Fail"
         } 
         if ($smb.State -eq "Disabled") {
@@ -1249,7 +1261,7 @@ function Test-SMBv1 {
                 -Category "Security Hardening" `
                 -Check "SMBv1" `
                 -Expected "Disabled" `
-                -Actual "SMBv1 = $smb.State" `
+                -Actual "SMBv1 = $($smb.State)" `
                 -Status "Pass"
         }
     } catch {
