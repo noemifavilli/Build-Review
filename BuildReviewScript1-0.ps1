@@ -1186,7 +1186,7 @@ function Test-AlwaysInstallElevated {
         # Path in system
         $path = "HKLM:\Software\Policies\Microsoft\Windows\Installer"
 
-        if (Test-Path $path -eq $false) {
+        if (Test-Path $path) {
             Add-Result `
                 -Category "Security Hardening" `
                 -Check "Always Install Elevated" `
