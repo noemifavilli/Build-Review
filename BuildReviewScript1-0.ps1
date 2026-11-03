@@ -1149,8 +1149,8 @@ function Test-SafeDLLSearch {
             -Category "Security Hardening" `
             -Check "Safe DLL Search" `
             -Expected "Enabled (1)" `
-            -Actual "SafeDllSearchMode =Not Configured" `
-            -Status "Error"
+            -Actual "SafeDllSearchMode = Not Configured" `
+            -Status "Not Configured"
 
             return
         } 
@@ -1181,7 +1181,7 @@ function Test-SafeDLLSearch {
 function Test-AlwaysInstallElevated {
     try {
         # Path in system
-        $path = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Installer"
+        $path = "HKLM:\Software\Policies\Microsoft\Windows\Installer"
 
         # Variable requried 
         $alwaysInstall = Get-ItemProperty `
@@ -1240,7 +1240,7 @@ function Test-SMBv1 {
                 -Category "Security Hardening" `
                 -Check "SMBv1" `
                 -Expected "Disabled" `
-                -Actual "SMBv1 = $smb" `
+                -Actual "SMBv1 = $smb.State" `
                 -Status "Fail"
         } 
         if ($smb.State -eq "Disabled") {
@@ -1249,7 +1249,7 @@ function Test-SMBv1 {
                 -Category "Security Hardening" `
                 -Check "SMBv1" `
                 -Expected "Disabled" `
-                -Actual "SMBv1 = $smb" `
+                -Actual "SMBv1 = $smb.State" `
                 -Status "Pass"
         }
     } catch {
